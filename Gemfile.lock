@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    airctiverecord (0.1.0)
+    airctiverecord (0.2.0)
       activemodel (>= 6.0)
       activesupport (>= 6.0)
       airrel (>= 0.2.0)
