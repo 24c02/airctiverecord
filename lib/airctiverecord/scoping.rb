@@ -10,15 +10,13 @@ module AirctiveRecord
 
       # scopes are defined on the model's specific Relation class
       def scope(name, body)
-        unless body.respond_to?(:call)
-          raise ArgumentError, "The scope body needs to be callable."
-        end
+        raise ArgumentError, "The scope body needs to be callable." unless body.respond_to?(:call)
 
         # define on the class
         singleton_class.send(:define_method, name) do |*args|
           all.public_send(name, *args)
         end
-        
+
         # define on this model's Relation class
         relation_class.send(:define_method, name) do |*args|
           instance_exec(*args, &body)

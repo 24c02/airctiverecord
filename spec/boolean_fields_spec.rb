@@ -7,11 +7,11 @@ RSpec.describe "Boolean fields" do
     build_test_model("BooleanTest") do
       self.base_key = "appTest123"
       self.table_name = "Test"
-      
+
       field :name, "Name"
       field :active, "Active", type: :boolean
       field :verified, "Verified", type: :boolean
-      
+
       scope :active, -> { where(active: true) }
     end
   end
@@ -56,7 +56,7 @@ RSpec.describe "Boolean fields" do
         expect(params[:filter]).to eq("{Active} = TRUE()")
         []
       end
-      
+
       model_class.active.to_a
     end
   end

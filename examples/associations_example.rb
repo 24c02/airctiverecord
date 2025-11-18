@@ -12,26 +12,26 @@ BASE_KEY = ENV.fetch("AIRTABLE_BASE_KEY")
 class Team < AirctiveRecord::Base
   self.base_key = BASE_KEY
   self.table_name = "Teams"
-  
+
   attribute :name
   attribute :description
-  
+
   has_many :users
   has_one :leader, class_name: "User", foreign_key: "Leader"
-  
+
   validates :name, presence: true
 end
 
 class User < AirctiveRecord::Base
   self.base_key = BASE_KEY
   self.table_name = "Users"
-  
+
   attribute :name
   attribute :email
-  
+
   belongs_to :team
   has_many :tasks
-  
+
   validates :name, presence: true
   validates :email, presence: true
 end
@@ -39,17 +39,17 @@ end
 class Task < AirctiveRecord::Base
   self.base_key = BASE_KEY
   self.table_name = "Tasks"
-  
+
   attribute :title
   attribute :status
   attribute :description
-  
+
   belongs_to :user
   has_one :team, through: :user
-  
+
   validates :title, presence: true
   validates :status, inclusion: { in: %w[pending in_progress completed] }
-  
+
   scope :pending, -> { where("{Status} = 'pending'") }
   scope :completed, -> { where("{Status} = 'completed'") }
 end

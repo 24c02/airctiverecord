@@ -22,10 +22,10 @@ module AirctiveRecord
         airtable_field_name ||= attr_name
         readonly = options[:readonly] || options[:read_only]
         field_type = options[:type]
-        
+
         field_mappings[attr_name] = airtable_field_name
         readonly_fields << airtable_field_name if readonly
-        
+
         define_attribute_methods attr_name
 
         define_method(attr_name) do
@@ -35,14 +35,14 @@ module AirctiveRecord
 
         if readonly
           # readonly fields silently ignore sets (airtable rejects them anyway)
-          define_method("#{attr_name}=") do |value|
+          define_method("#{attr_name}=") do |_value|
             nil
           end
         else
           define_method("#{attr_name}=") do |value|
             field_name = self.class.field_mappings[attr_name]
             return if self[field_name] == value
-            
+
             send("#{attr_name}_will_change!") unless self[field_name] == value
             self[field_name] = value
           end

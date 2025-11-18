@@ -7,13 +7,13 @@ require "airctiverecord"
 class User < AirctiveRecord::Base
   self.base_key = "appTest123"
   self.table_name = "Users"
-  
+
   field :role, "Role"
   field :active, "Active"
-  
+
   scope :active, -> { where(active: true) }
   scope :admins, -> { where(role: "admin") }
-  
+
   def self.records(**params)
     puts "User.records called with: #{params.inspect}"
     []
@@ -23,13 +23,13 @@ end
 class Post < AirctiveRecord::Base
   self.base_key = "appTest123"
   self.table_name = "Posts"
-  
+
   field :status, "Status"
   field :featured, "Featured"
-  
+
   scope :published, -> { where(status: "published") }
   scope :featured, -> { where(featured: true) }
-  
+
   def self.records(**params)
     puts "Post.records called with: #{params.inspect}"
     []

@@ -7,17 +7,17 @@ require "airctiverecord"
 class User < AirctiveRecord::Base
   self.base_key = "appTest123"
   self.table_name = "Users"
-  
+
   field :name, "Name"
   field :email, "Email"
   field :active, "Active", type: :boolean
   field :verified, "Verified", type: :boolean
   field :admin, "Admin", type: :boolean
-  
+
   scope :active, -> { where(active: true) }
   scope :verified, -> { where(verified: true) }
   scope :admins, -> { where(admin: true) }
-  
+
   def self.records(**params)
     puts "records(#{params.inspect})"
     []

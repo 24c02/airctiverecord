@@ -7,7 +7,7 @@ RSpec.describe "Field Mappings" do
     Class.new(AirctiveRecord::Base) do
       self.base_key = "appTest123"
       self.table_name = "Test"
-      
+
       field :first_name, "First Name"
       field :last_name, "Last Name"
       field :email_address, "Email Address"
@@ -24,10 +24,10 @@ RSpec.describe "Field Mappings" do
       )
 
       expect(record.fields).to eq({
-        "First Name" => "Alice",
-        "Last Name" => "Smith",
-        "Email Address" => "alice@example.com"
-      })
+                                    "First Name" => "Alice",
+                                    "Last Name" => "Smith",
+                                    "Email Address" => "alice@example.com"
+                                  })
     end
 
     it "handles symbol keys" do
@@ -66,10 +66,10 @@ RSpec.describe "Field Mappings" do
 
     it "tracks changes" do
       record.first_name = "Alicia"
-      
+
       expect(record.first_name_changed?).to be true
       expect(record.first_name_was).to eq("Alice")
-      expect(record.first_name_change).to eq(["Alice", "Alicia"])
+      expect(record.first_name_change).to eq(%w[Alice Alicia])
     end
 
     it "doesn't mark as changed if value is same" do
@@ -81,7 +81,7 @@ RSpec.describe "Field Mappings" do
   describe "field_mappings class method" do
     it "stores mappings" do
       mappings = model_class.field_mappings
-      
+
       expect(mappings["first_name"]).to eq("First Name")
       expect(mappings["last_name"]).to eq("Last Name")
       expect(mappings["email_address"]).to eq("Email Address")

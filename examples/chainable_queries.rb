@@ -7,18 +7,18 @@ require "airctiverecord"
 class User < AirctiveRecord::Base
   self.base_key = "appTest123"
   self.table_name = "Users"
-  
+
   field :first_name, "First Name"
   field :email, "Email Address"
   field :role, "Role"
   field :active, "Active"
   field :age, "Age"
-  
+
   scope :active, -> { where(active: true) }
   scope :admins, -> { where(role: "admin") }
   scope :adults, -> { where("AND({Age} >= 18, {Age} < 65)") }
   scope :recent, -> { order(created_at: :desc).limit(10) }
-  
+
   def self.records(**params)
     puts "Would call Airtable API with:"
     puts params.inspect
@@ -44,7 +44,7 @@ User.where(age: 18..65).to_a
 puts
 
 puts "=== IN queries ==="
-User.where(role: ["admin", "moderator", "guest"]).to_a
+User.where(role: %w[admin moderator guest]).to_a
 puts
 
 puts "=== raw formulas still work ==="

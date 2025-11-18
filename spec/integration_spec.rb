@@ -7,36 +7,36 @@ RSpec.describe "Integration" do
     build_test_model("TestUser") do
       self.base_key = "appTest123"
       self.table_name = "Users"
-      
+
       field :first_name, "First Name"
       field :last_name, "Last Name"
       field :email, "Email Address"
       field :age, "Age"
       field :role, "Role"
-      
+
       validates :first_name, :last_name, presence: true
       validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
       validates :age, numericality: { greater_than: 0 }, allow_nil: true
-      
+
       before_save :normalize_email
-      
+
       attr_accessor :email_normalized
-      
+
       scope :adults, -> { where("AND({Age} >= 18, {Age} < 65)") }
       scope :admins, -> { where(role: "admin") }
-      
+
       def normalize_email
         self.email = email&.downcase
         @email_normalized = true
       end
-      
+
       def self.records(**params)
         @last_params = params
         []
       end
-      
-      def self.last_params
-        @last_params
+
+      class << self
+        attr_reader :last_params
       end
     end
   end
@@ -64,31 +64,31 @@ RSpec.describe "Integration" do
       # scopes use field mappings
       relation = model_class.adults.admins
       relation.to_a
-      
+
       params = model_class.last_params
       expect(params[:filter]).to include("{Role} = 'admin'")
     end
 
     it "handles invalid records correctly" do
       user = model_class.new(email: "invalid")
-      
+
       expect(user.valid?).to be false
       expect(user.save).to be false
-      expect {
+      expect do
         user.save!
-      }.to raise_error(AirctiveRecord::RecordInvalid)
+      end.to raise_error(AirctiveRecord::RecordInvalid)
     end
   end
 
   describe "dirty tracking with field mappings" do
     it "tracks changes through mapped fields" do
       user = model_class.new(first_name: "Alice", last_name: "Smith")
-      
+
       user.first_name = "Alicia"
-      
+
       expect(user.changed?).to be true
       expect(user.first_name_changed?).to be true
-      expect(user.changes).to eq({ "first_name" => ["Alice", "Alicia"] })
+      expect(user.changes).to eq({ "first_name" => %w[Alice Alicia] })
     end
   end
 
@@ -99,7 +99,7 @@ RSpec.describe "Integration" do
         last_name: 'Say "hello"'
       )
       relation.to_a
-      
+
       filter = model_class.last_params[:filter]
       expect(filter).to include("'O\\'Reilly'")
       expect(filter).to include('Say \\"hello\\"')
@@ -109,19 +109,19 @@ RSpec.describe "Integration" do
   describe "complex queries" do
     it "combines hash and raw formulas with field mappings" do
       relation = model_class
-        .where(role: "admin")
-        .where("{Age} >= 18")
-        .order(first_name: :asc, last_name: :desc)
-        .limit(20)
-      
+                 .where(role: "admin")
+                 .where("{Age} >= 18")
+                 .order(first_name: :asc, last_name: :desc)
+                 .limit(20)
+
       relation.to_a
       params = model_class.last_params
-      
+
       expect(params[:filter]).to eq("AND({Role} = 'admin', {Age} >= 18)")
       expect(params[:sort]).to eq([
-        { field: "First Name", direction: "asc" },
-        { field: "Last Name", direction: "desc" }
-      ])
+                                    { field: "First Name", direction: "asc" },
+                                    { field: "Last Name", direction: "desc" }
+                                  ])
       expect(params[:max_records]).to eq(20)
     end
   end

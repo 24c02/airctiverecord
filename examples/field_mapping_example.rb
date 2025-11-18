@@ -11,7 +11,7 @@ Norairrecord.api_key = ENV.fetch("AIRTABLE_API_KEY", "test_key")
 class Contact < AirctiveRecord::Base
   self.base_key = ENV.fetch("AIRTABLE_BASE_KEY", "appTest123")
   self.table_name = "Contacts"
-  
+
   # Map Ruby attribute names to Airtable field names with spaces
   field :first_name, "First Name"
   field :last_name, "Last Name"
@@ -22,21 +22,21 @@ class Contact < AirctiveRecord::Base
   field :linkedin_url, "LinkedIn URL"
   field :date_added, "Date Added"
   field :is_vip, "VIP?"
-  
+
   # Validations using Ruby attribute names
   validates :first_name, :last_name, presence: true
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :phone_number, length: { minimum: 10 }, allow_blank: true
-  
+
   # Callbacks
   before_save :normalize_email
-  
+
   # Scopes
   scope :vip, -> { where("{VIP?} = TRUE()") }
   scope :with_email, -> { where("{Email Address} != ''") }
-  
+
   private
-  
+
   def normalize_email
     self.email_address = email_address&.downcase&.strip
   end

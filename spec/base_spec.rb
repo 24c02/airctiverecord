@@ -7,16 +7,16 @@ RSpec.describe AirctiveRecord::Base do
     build_test_model("TestUser") do
       self.base_key = "appTest123"
       self.table_name = "Test"
-      
+
       attribute :name
       attribute :email
       attribute :age
-      
+
       validates :name, presence: true
-      validates :email, format: { with: /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i }, allow_blank: true
-      
+      validates :email, format: { with: /\A[\w+\-.]+@[a-z\d-]+(\.[a-z\d-]+)*\.[a-z]+\z/i }, allow_blank: true
+
       before_save :normalize_name
-      
+
       def normalize_name
         self.name = name&.strip
       end

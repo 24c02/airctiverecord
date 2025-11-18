@@ -7,19 +7,19 @@ RSpec.describe "Relation" do
     Class.new(AirctiveRecord::Base) do
       self.base_key = "appTest123"
       self.table_name = "Users"
-      
+
       field :first_name, "First Name"
       field :email, "Email Address"
       field :role, "Role"
       field :active, "Active"
-      
+
       def self.records(**params)
         @last_params = params
         []
       end
-      
-      def self.last_params
-        @last_params
+
+      class << self
+        attr_reader :last_params
       end
     end
   end
@@ -33,7 +33,7 @@ RSpec.describe "Relation" do
     it "chains multiple where clauses" do
       relation = model_class.where(role: "admin").where(active: true)
       relation.to_a
-      
+
       params = model_class.last_params
       expect(params[:filter]).to eq("AND({Role} = 'admin', {Active} = TRUE())")
     end
@@ -41,7 +41,7 @@ RSpec.describe "Relation" do
     it "uses field mappings in queries" do
       relation = model_class.where(first_name: "Alice", email: "alice@example.com")
       relation.to_a
-      
+
       params = model_class.last_params
       expect(params[:filter]).to include("{First Name} = 'Alice'")
       expect(params[:filter]).to include("{Email Address} = 'alice@example.com'")
@@ -50,7 +50,7 @@ RSpec.describe "Relation" do
     it "applies field mappings to order clauses" do
       relation = model_class.order(:first_name)
       relation.to_a
-      
+
       params = model_class.last_params
       expect(params[:sort]).to eq([{ field: "First Name", direction: "asc" }])
     end
@@ -77,7 +77,7 @@ RSpec.describe "Relation" do
     it "chains scopes" do
       relation = model_class.active.admins
       relation.to_a
-      
+
       params = model_class.last_params
       expect(params[:filter]).to eq("AND({Active} = TRUE(), {Role} = 'admin')")
     end
@@ -93,10 +93,10 @@ RSpec.describe "Relation" do
       Class.new(AirctiveRecord::Base) do
         self.base_key = "appTest123"
         self.table_name = "Posts"
-        
+
         scope :published, -> { where(status: "published") }
-        
-        def self.records(**params)
+
+        def self.records(**_params)
           []
         end
       end
@@ -113,14 +113,14 @@ RSpec.describe "Relation" do
     it "delegates first to relation" do
       expect(model_class).to receive(:all).and_call_original
       model_class.first
-      
+
       params = model_class.last_params
       expect(params[:max_records]).to eq(1)
     end
 
     it "delegates limit to relation" do
       model_class.limit(10).to_a
-      
+
       params = model_class.last_params
       expect(params[:max_records]).to eq(10)
     end
@@ -134,14 +134,14 @@ RSpec.describe "Relation" do
   describe "find_by" do
     it "finds by hash conditions" do
       allow(model_class).to receive(:records).and_return([double(email: "test@example.com")])
-      
+
       result = model_class.find_by(email: "test@example.com")
       expect(result).to be_present
     end
 
     it "returns nil if not found" do
       allow(model_class).to receive(:records).and_return([])
-      
+
       result = model_class.find_by(email: "missing@example.com")
       expect(result).to be_nil
     end
@@ -150,10 +150,10 @@ RSpec.describe "Relation" do
   describe "find_by!" do
     it "raises if not found" do
       allow(model_class).to receive(:records).and_return([])
-      
-      expect {
+
+      expect do
         model_class.find_by!(email: "missing@example.com")
-      }.to raise_error(StandardError, /not found/)
+      end.to raise_error(StandardError, /not found/)
     end
   end
 end

@@ -10,15 +10,15 @@ end
 
 class Contact < AirpplicationRecord
   self.table_name = "Contacts"
-  
+
   field :name, "Name"
   field :email, "Email"
   field :company, "Company"
-  
+
   # lookup fields (pulled from linked Company record)
   field :company_name, "Company Name (from Company)", readonly: true
   field :company_address, "Company Address (from Company)", readonly: true
-  
+
   # formula fields (computed by airtable)
   field :full_name, "Full Name (formula)", readonly: true
 end
@@ -26,16 +26,16 @@ end
 contact = Contact.new(
   name: "Alice",
   email: "alice@example.com",
-  company_name: "Acme Corp"  # readonly field - silently ignored
+  company_name: "Acme Corp" # readonly field - silently ignored
 )
 
 puts "=== readonly fields are readable ==="
 contact.instance_variable_set(:@fields, {
-  "Name" => "Alice",
-  "Email" => "alice@example.com",
-  "Company Name (from Company)" => "Acme Corp",
-  "Full Name (formula)" => "Alice Smith"
-})
+                                "Name" => "Alice",
+                                "Email" => "alice@example.com",
+                                "Company Name (from Company)" => "Acme Corp",
+                                "Full Name (formula)" => "Alice Smith"
+                              })
 
 puts "company_name: #{contact.company_name}"
 puts "full_name: #{contact.full_name}"

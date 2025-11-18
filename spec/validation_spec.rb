@@ -7,11 +7,11 @@ RSpec.describe "Validations" do
     build_test_model("TestUser") do
       self.base_key = "appTest123"
       self.table_name = "Users"
-      
+
       field :name, "Name"
       field :email, "Email"
       field :age, "Age"
-      
+
       validates :name, presence: true
       validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
       validates :age, numericality: { greater_than: 0 }, allow_nil: true
@@ -75,7 +75,7 @@ RSpec.describe "Validations" do
   describe "save with validation" do
     it "returns false if invalid" do
       record = model_class.new
-      
+
       expect(record.save).to be false
     end
 
@@ -83,7 +83,7 @@ RSpec.describe "Validations" do
       record = model_class.new(name: "Alice")
       # stub _create to avoid actual airtable call
       allow(record).to receive(:_create).and_return(nil)
-      
+
       expect(record.save).to be true
     end
   end
@@ -91,10 +91,10 @@ RSpec.describe "Validations" do
   describe "save! with validation" do
     it "raises if invalid" do
       record = model_class.new
-      
-      expect {
+
+      expect do
         record.save!
-      }.to raise_error(AirctiveRecord::RecordInvalid, /can't be blank/)
+      end.to raise_error(AirctiveRecord::RecordInvalid, /can't be blank/)
     end
   end
 end

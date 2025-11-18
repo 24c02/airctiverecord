@@ -18,11 +18,9 @@ module AirctiveRecord
     # override to use field mappings when building airtable params
     def to_airtable_params
       params = {}
-      
+
       # filter
-      if @where_clause.any?
-        params[:filter] = @where_clause.to_airtable_formula
-      end
+      params[:filter] = @where_clause.to_airtable_formula if @where_clause.any?
 
       # sort - use field mappings
       if @order_values.any?
@@ -34,7 +32,7 @@ module AirctiveRecord
 
       # limit
       params[:max_records] = @limit_value if @limit_value
-      
+
       # offset
       params[:offset] = @offset_value if @offset_value
 

@@ -34,10 +34,10 @@ module AirctiveRecord
       # Extract id and created_at if present
       id = kwargs.delete(:id)
       created_at = kwargs.delete(:created_at)
-      
+
       # Merge positional hash and kwargs to handle both styles
       all_attrs = attributes.is_a?(Hash) ? attributes.merge(kwargs) : kwargs
-      
+
       # Norairrecord::Table expects field names as STRING keys
       # We need to convert Ruby attribute names to Airtable field names
       mapped_attrs = {}
@@ -45,7 +45,7 @@ module AirctiveRecord
         field_name = self.class.field_mappings[key.to_s] || key.to_s
         mapped_attrs[field_name.to_s] = value # Ensure string keys
       end
-      
+
       # Call norairrecord's initialize properly
       if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.0.0")
         if mapped_attrs.empty?
@@ -56,7 +56,7 @@ module AirctiveRecord
       else
         super(mapped_attrs, id: id, created_at: created_at)
       end
-      
+
       clear_changes_information
     end
 
@@ -66,12 +66,12 @@ module AirctiveRecord
 
     def serializable_fields
       # exclude readonly fields from serialization
-      fields.reject { |k, v| self.class.readonly_fields.include?(k) }
+      fields.reject { |k, _v| self.class.readonly_fields.include?(k) }
     end
 
     def save(**options)
       return false unless valid?
-      
+
       begin
         run_callbacks :save do
           if new_record?
@@ -86,13 +86,14 @@ module AirctiveRecord
         end
         changes_applied
         true
-      rescue => e
+      rescue StandardError
         false
       end
     end
 
     def save!(**options)
       raise RecordInvalid, errors.full_messages.join(", ") unless valid?
+
       save(**options) || raise(RecordNotSaved, "Failed to save record")
     end
 
@@ -108,6 +109,7 @@ module AirctiveRecord
 
     def reload
       return self if new_record?
+
       reloaded = self.class.find(id)
       @fields = reloaded.fields
       @created_at = reloaded.created_at

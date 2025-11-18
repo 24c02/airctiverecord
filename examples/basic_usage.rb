@@ -11,33 +11,33 @@ Norairrecord.api_key = ENV.fetch("AIRTABLE_API_KEY")
 class User < AirctiveRecord::Base
   self.base_key = ENV.fetch("AIRTABLE_BASE_KEY")
   self.table_name = "Users"
-  
+
   # Define attributes
   attribute :name
   attribute :email
   attribute :age
   attribute :role
-  
+
   # Validations
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :age, numericality: { greater_than: 0, less_than: 150 }, allow_nil: true
   validates :role, inclusion: { in: %w[admin user guest] }, allow_nil: true
-  
+
   # Callbacks
   before_save :normalize_email
   after_create :log_creation
-  
+
   # Scopes
   scope :admins, -> { where("{Role} = 'admin'") }
   scope :active, -> { where("{Active} = TRUE()") }
-  
+
   private
-  
+
   def normalize_email
     self.email = email.downcase.strip if email.present?
   end
-  
+
   def log_creation
     puts "Created user: #{name} (#{email})"
   end
@@ -86,6 +86,6 @@ puts "Name is now: #{user.name}"
 puts "\nTrying to create invalid user..."
 invalid_user = User.new(email: "not-an-email")
 puts "Valid? #{invalid_user.valid?}"
-puts "Errors: #{invalid_user.errors.full_messages.join(', ')}"
+puts "Errors: #{invalid_user.errors.full_messages.join(", ")}"
 
 puts "\nDone!"
