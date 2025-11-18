@@ -66,9 +66,7 @@ module AirctiveRecord
       end
     end
 
-    def attributes
-      fields
-    end
+    def attributes = fields
 
     def attributes=(attrs)
       attrs.each do |key, value|

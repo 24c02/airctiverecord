@@ -5,10 +5,8 @@ module AirctiveRecord
     extend ActiveSupport::Concern
 
     class_methods do
-      # returns a chainable Relation object (model-specific!)
-      def all
-        relation_class.new(self)
-      end
+      # returns a chainable Relation object
+      def all = relation_class.new(self)
 
       # scopes are defined on the model's specific Relation class
       def scope(name, body)
@@ -28,41 +26,23 @@ module AirctiveRecord
       end
 
       # delegate finder methods to all
-      def where(conditions)
-        all.where(conditions)
-      end
+      def where(conditions) = all.where(conditions)
 
-      def order(*args)
-        all.order(*args)
-      end
+      def order(*args) = all.order(*args)
 
-      def limit(value)
-        all.limit(value)
-      end
+      def limit(value) = all.limit(value)
 
-      def offset(value)
-        all.offset(value)
-      end
+      def offset(value) = all.offset(value)
 
-      def find_by(conditions)
-        all.find_by(conditions)
-      end
+      def find_by(conditions) = all.find_by(conditions)
 
-      def find_by!(conditions)
-        all.find_by!(conditions)
-      end
+      def find_by!(conditions) = all.find_by!(conditions)
 
-      def first(limit = nil)
-        all.first(limit)
-      end
+      def first(limit = nil) = all.first(limit)
 
-      def last(limit = nil)
-        all.last(limit)
-      end
+      def last(limit = nil) = all.last(limit)
 
-      def count
-        all.count
-      end
+      def count = all.count
     end
   end
 end

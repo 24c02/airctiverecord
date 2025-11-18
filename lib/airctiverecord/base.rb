@@ -27,9 +27,7 @@ module AirctiveRecord
         @relation_class ||= Class.new(AirctiveRecord::Relation)
       end
 
-      def relation_class_name
-        "#{name}::Relation"
-      end
+      def relation_class_name = "#{name}::Relation"
     end
 
     def initialize(attributes = {}, **kwargs)
@@ -117,20 +115,12 @@ module AirctiveRecord
       self
     end
 
-    def persisted?
-      !new_record?
-    end
+    def persisted? = !new_record?
 
-    def to_param
-      id
-    end
+    def to_param = id
 
-    def to_key
-      persisted? ? [id] : nil
-    end
+    def to_key = persisted? ? [id] : nil
 
-    def to_model
-      self
-    end
+    def to_model = self
   end
 end
