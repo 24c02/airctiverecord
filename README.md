@@ -110,6 +110,12 @@ user = User.find_by!(email: "alice@example.com") # raises if not found
 user = User.find_or_create_by(email: "alice@example.com") # finds or creates
 user = User.find_or_create_by!(email: "alice@example.com") # raises on validation error
 
+# find or create with a block (block only runs if creating)
+user = User.find_or_create_by(email: "alice@example.com") do |u|
+  u.first_name = "Alice"
+  u.last_name = "Smith"
+end
+
 # update
 user.update(first_name: "Alicia")
 user.first_name = "Alicia"

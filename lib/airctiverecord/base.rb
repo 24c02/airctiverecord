@@ -29,14 +29,16 @@ module AirctiveRecord
 
       def relation_class_name = "#{name}::Relation"
 
-      def create(attributes = {})
+      def create(attributes = {}, &block)
         record = new(attributes)
+        yield(record) if block_given?
         record.save
         record
       end
 
-      def create!(attributes = {})
+      def create!(attributes = {}, &block)
         record = new(attributes)
+        yield(record) if block_given?
         record.save!
         record
       end

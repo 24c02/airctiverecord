@@ -92,6 +92,43 @@ RSpec.describe "find_or_create_by" do
         expect(result.name).to eq("Charlie")
       end
     end
+
+    context "with a block" do
+      it "yields to the block when creating a new record" do
+        # Mock save to return true and set id
+        allow_any_instance_of(model_class).to receive(:save) do |record|
+          record.instance_variable_set(:@id, "rec#{rand(100000)}")
+          record.instance_variable_set(:@new_record, false)
+          true
+        end
+
+        result = model_class.find_or_create_by(email: "block@example.com") do |user|
+          user.name = "Block User"
+          user.age = 25
+        end
+
+        expect(result.email).to eq("block@example.com")
+        expect(result.name).to eq("Block User")
+        expect(result.age).to eq(25)
+      end
+
+      it "does not yield when record exists" do
+        existing_record = model_class.new(email: "exists@example.com", name: "Existing")
+        existing_record.instance_variable_set(:@id, "rec789")
+        existing_record.instance_variable_set(:@new_record, false)
+        
+        model_class.stub_records = [existing_record]
+
+        block_called = false
+        result = model_class.find_or_create_by(email: "exists@example.com") do |user|
+          block_called = true
+          user.name = "Should Not Change"
+        end
+
+        expect(block_called).to be false
+        expect(result.name).to eq("Existing")
+      end
+    end
   end
 
   describe "#find_or_create_by!" do
@@ -151,6 +188,51 @@ RSpec.describe "find_or_create_by" do
         # Check record was created with mapped fields
         expect(result.email).to eq("mapped2@example.com")
         expect(result.name).to eq("Diana")
+      end
+    end
+
+    context "with a block" do
+      it "yields to the block when creating a new record" do
+        # Mock save! to return true and set id
+        allow_any_instance_of(model_class).to receive(:save!) do |record|
+          record.instance_variable_set(:@id, "rec#{rand(100000)}")
+          record.instance_variable_set(:@new_record, false)
+          true
+        end
+
+        result = model_class.find_or_create_by!(email: "block@example.com") do |user|
+          user.name = "Block User"
+          user.age = 30
+        end
+
+        expect(result.email).to eq("block@example.com")
+        expect(result.name).to eq("Block User")
+        expect(result.age).to eq(30)
+      end
+
+      it "does not yield when record exists" do
+        existing_record = model_class.new(email: "exists@example.com", name: "Existing")
+        existing_record.instance_variable_set(:@id, "rec999")
+        existing_record.instance_variable_set(:@new_record, false)
+        
+        model_class.stub_records = [existing_record]
+
+        block_called = false
+        result = model_class.find_or_create_by!(email: "exists@example.com") do |user|
+          block_called = true
+          user.name = "Should Not Change"
+        end
+
+        expect(block_called).to be false
+        expect(result.name).to eq("Existing")
+      end
+
+      it "raises RecordInvalid with block attributes if validation fails" do
+        expect do
+          model_class.find_or_create_by!(email: "invalid@example.com") do |user|
+            user.email = nil # Make it invalid
+          end
+        end.to raise_error(AirctiveRecord::RecordInvalid, /can't be blank/)
       end
     end
   end
