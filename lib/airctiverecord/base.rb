@@ -31,7 +31,8 @@ module AirctiveRecord
 
       def create(attributes = {})
         record = new(attributes)
-        record.save ? record : record
+        record.save
+        record
       end
 
       def create!(attributes = {})
