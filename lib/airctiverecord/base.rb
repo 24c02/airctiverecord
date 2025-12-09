@@ -28,6 +28,17 @@ module AirctiveRecord
       end
 
       def relation_class_name = "#{name}::Relation"
+
+      def create(attributes = {})
+        record = new(attributes)
+        record.save ? record : record
+      end
+
+      def create!(attributes = {})
+        record = new(attributes)
+        record.save!
+        record
+      end
     end
 
     def initialize(attributes = {}, **kwargs)

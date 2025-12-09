@@ -15,41 +15,6 @@ RSpec.describe "find_or_create_by" do
       validates :email, presence: true
       validates :age, numericality: { greater_than: 0 }, allow_nil: true
 
-      # Track created records
-      @created_records = []
-
-      def self.create(attributes)
-        record = new(attributes)
-        if record.valid?
-          record.instance_variable_set(:@id, "rec#{rand(100000)}")
-          record.instance_variable_set(:@new_record, false)
-          @created_records << record
-          record
-        else
-          record
-        end
-      end
-
-      def self.create!(attributes)
-        record = new(attributes)
-        if record.valid?
-          record.instance_variable_set(:@id, "rec#{rand(100000)}")
-          record.instance_variable_set(:@new_record, false)
-          @created_records << record
-          record
-        else
-          raise AirctiveRecord::RecordInvalid, record.errors.full_messages.join(", ")
-        end
-      end
-
-      def self.created_records
-        @created_records
-      end
-
-      def self.reset_created_records
-        @created_records = []
-      end
-
       def self.records(**params)
         @last_params = params
         @stub_records || []
@@ -63,7 +28,6 @@ RSpec.describe "find_or_create_by" do
   end
 
   before do
-    model_class.reset_created_records
     model_class.stub_records = []
   end
 
@@ -79,13 +43,18 @@ RSpec.describe "find_or_create_by" do
         result = model_class.find_or_create_by(email: "test@example.com")
 
         expect(result).to eq(existing_record)
-        expect(model_class.created_records).to be_empty
+        expect(result.id).to eq("rec123")
       end
     end
 
     context "when record does not exist" do
       it "creates a new record" do
-        model_class.stub_records = []
+        # Mock save to return true and set id
+        allow_any_instance_of(model_class).to receive(:save) do |record|
+          record.instance_variable_set(:@id, "rec#{rand(100000)}")
+          record.instance_variable_set(:@new_record, false)
+          true
+        end
 
         result = model_class.find_or_create_by(email: "new@example.com", name: "Bob")
 
@@ -93,12 +62,9 @@ RSpec.describe "find_or_create_by" do
         expect(result.email).to eq("new@example.com")
         expect(result.name).to eq("Bob")
         expect(result.id).to be_present
-        expect(model_class.created_records.size).to eq(1)
       end
 
       it "returns the created record even if invalid" do
-        model_class.stub_records = []
-
         result = model_class.find_or_create_by(email: nil, name: "Invalid")
 
         expect(result).to be_a(model_class)
@@ -109,7 +75,12 @@ RSpec.describe "find_or_create_by" do
 
     context "with field mappings" do
       it "uses field mappings in both find and create" do
-        model_class.stub_records = []
+        # Mock save to return true and set id
+        allow_any_instance_of(model_class).to receive(:save) do |record|
+          record.instance_variable_set(:@id, "rec#{rand(100000)}")
+          record.instance_variable_set(:@new_record, false)
+          true
+        end
 
         result = model_class.find_or_create_by(email: "mapped@example.com", name: "Charlie")
 
@@ -135,13 +106,18 @@ RSpec.describe "find_or_create_by" do
         result = model_class.find_or_create_by!(email: "test@example.com")
 
         expect(result).to eq(existing_record)
-        expect(model_class.created_records).to be_empty
+        expect(result.id).to eq("rec456")
       end
     end
 
     context "when record does not exist" do
       it "creates a new record" do
-        model_class.stub_records = []
+        # Mock save! to return true and set id
+        allow_any_instance_of(model_class).to receive(:save!) do |record|
+          record.instance_variable_set(:@id, "rec#{rand(100000)}")
+          record.instance_variable_set(:@new_record, false)
+          true
+        end
 
         result = model_class.find_or_create_by!(email: "new@example.com", name: "Bob")
 
@@ -149,12 +125,9 @@ RSpec.describe "find_or_create_by" do
         expect(result.email).to eq("new@example.com")
         expect(result.name).to eq("Bob")
         expect(result.id).to be_present
-        expect(model_class.created_records.size).to eq(1)
       end
 
       it "raises RecordInvalid if validation fails" do
-        model_class.stub_records = []
-
         expect do
           model_class.find_or_create_by!(email: nil, name: "Invalid")
         end.to raise_error(AirctiveRecord::RecordInvalid, /can't be blank/)
@@ -163,7 +136,12 @@ RSpec.describe "find_or_create_by" do
 
     context "with field mappings" do
       it "uses field mappings in both find and create" do
-        model_class.stub_records = []
+        # Mock save! to return true and set id
+        allow_any_instance_of(model_class).to receive(:save!) do |record|
+          record.instance_variable_set(:@id, "rec#{rand(100000)}")
+          record.instance_variable_set(:@new_record, false)
+          true
+        end
 
         result = model_class.find_or_create_by!(email: "mapped2@example.com", name: "Diana")
 
