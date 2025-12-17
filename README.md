@@ -323,17 +323,21 @@ User.first(10)   # limit(10)
 
 **large tables**
 
-for tables with 25k+ records, process in batches:
+for tables with many records, use `find_each` or `find_in_batches`:
 
 ```ruby
-# batch processing
-offset = 0
-loop do
-  batch = User.limit(100).offset(offset).to_a
-  break if batch.empty?
-  batch.each { |user| process(user) }
-  offset += 100
+# process records one at a time (fetches in batches of 100 internally)
+User.where(active: true).find_each do |user|
+  process(user)
 end
+
+# process records in batches
+User.find_in_batches(batch_size: 50) do |batch|
+  bulk_import(batch)
+end
+
+# works with scopes and conditions
+User.active.admins.find_each(batch_size: 50) { |user| sync(user) }
 ```
 
 ## license
