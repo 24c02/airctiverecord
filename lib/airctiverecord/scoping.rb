@@ -36,6 +36,14 @@ module AirctiveRecord
 
       def find_by!(conditions) = all.find_by!(conditions)
 
+      def find_or_create_by(conditions, &block)
+        find_by(conditions) || create(conditions, &block)
+      end
+
+      def find_or_create_by!(conditions, &block)
+        find_by(conditions) || create!(conditions, &block)
+      end
+
       def first(limit = nil) = all.first(limit)
 
       def last(limit = nil) = all.last(limit)
