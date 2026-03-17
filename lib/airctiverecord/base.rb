@@ -35,8 +35,10 @@ module AirctiveRecord
       id = kwargs.delete(:id)
       created_at = kwargs.delete(:created_at)
 
-      # Merge positional hash and kwargs to handle both styles
-      all_attrs = attributes.is_a?(Hash) ? attributes.merge(kwargs) : kwargs
+      # Merge positional hash and kwargs to handle both styles.
+      # Call to_h to handle ActionController::Parameters, which is not a Hash subclass.
+      attr_hash = attributes.respond_to?(:to_h) ? attributes.to_h : {}
+      all_attrs = attr_hash.merge(kwargs)
 
       # Norairrecord::Table expects field names as STRING keys
       # We need to convert Ruby attribute names to Airtable field names
@@ -72,29 +74,25 @@ module AirctiveRecord
     def save(**options)
       return false unless valid?
 
-      begin
-        run_callbacks :save do
-          if new_record?
-            run_callbacks :create do
-              super(**options)
-            end
-          else
-            run_callbacks :update do
-              super(**options)
-            end
+      run_callbacks :save do
+        if new_record?
+          run_callbacks :create do
+            super(**options)
+          end
+        else
+          run_callbacks :update do
+            super(**options)
           end
         end
-        changes_applied
-        true
-      rescue StandardError
-        false
       end
+      changes_applied
+      true
     end
 
     def save!(**options)
       raise RecordInvalid, errors.full_messages.join(", ") unless valid?
 
-      save(**options) || raise(RecordNotSaved, "Failed to save record")
+      save(**options)
     end
 
     def update(attributes)

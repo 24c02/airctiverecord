@@ -56,7 +56,7 @@ RSpec.describe "Integration" do
       expect(user.valid?).to be true
 
       # callbacks run on save
-      allow(user).to receive(:_save).and_return(true)
+      allow(user).to receive(:_create).and_return(true)
       user.save
       expect(user.email_normalized).to be true
       expect(user.email).to eq("alice@example.com")
