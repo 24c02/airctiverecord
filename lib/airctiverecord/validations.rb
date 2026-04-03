@@ -17,7 +17,7 @@ module AirctiveRecord
     end
 
     def save(**options)
-      return false unless valid?
+      return false unless valid?(new_record? ? :create : :update)
 
       super
     end

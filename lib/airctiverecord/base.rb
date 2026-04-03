@@ -72,7 +72,7 @@ module AirctiveRecord
     end
 
     def save(**options)
-      return false unless valid?
+      return false unless valid?(new_record? ? :create : :update)
 
       run_callbacks :save do
         if new_record?
@@ -90,7 +90,7 @@ module AirctiveRecord
     end
 
     def save!(**options)
-      raise RecordInvalid, errors.full_messages.join(", ") unless valid?
+      raise RecordInvalid, errors.full_messages.join(", ") unless valid?(new_record? ? :create : :update)
 
       save(**options)
     end
